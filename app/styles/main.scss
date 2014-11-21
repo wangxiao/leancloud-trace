@@ -6,3 +6,30 @@
 body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
+
+.wrapper {
+    text-align: center;
+    h1 {
+        margin: 20px 0px;
+    }
+}
+
+.root-tree {
+    display: inline-block;
+    width: 480px;
+    height: 500px;
+}
+
+.show-detail {
+    display: inline-block;
+    margin-top: 50px;
+    width: 800px;
+    height: 500px;    
+}
+
+.inputs {
+    p {
+        display: inline-block;
+        margin: 0px 10px;
+    }
+}
