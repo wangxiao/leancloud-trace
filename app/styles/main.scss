@@ -16,15 +16,17 @@ body {
 
 .root-tree {
     display: inline-block;
-    width: 480px;
-    height: 500px;
+    width: 600px;
+    height: 300px;
+    vertical-align: top;
+    margin-top: 100px;
 }
 
 .show-detail {
     display: inline-block;
     margin-top: 50px;
     width: 800px;
-    height: 500px;    
+    height: 500px;
 }
 
 .inputs {

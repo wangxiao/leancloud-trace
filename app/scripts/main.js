@@ -9,6 +9,7 @@ require([
     'echarts/chart/line'
 ],
 function (ec) {
+    var host = 'http://trace.avoscloud.com';
     var colorTheme = [
         "#2ec7c9",
         "#b6a2de",
@@ -59,17 +60,7 @@ function (ec) {
         tooltip : {
             trigger: 'axis'
         },
-        legend: {
-            data:['意向','预购','成交']
-        },
         // calculable : true,
-        xAxis : [
-            {
-                type : 'category',
-                boundaryGap : false,
-                data : ['周一','周二','周三','周四','周五','周六','周日']
-            }
-        ],
         yAxis : [
             {
                 type : 'value'
@@ -79,56 +70,93 @@ function (ec) {
     var chartLine = ec.init(document.getElementById('show-detail'));
     chartLine.setOption(lineOption);
 
-    $.ajax({
-       url: 'http://trace.avoscloud.com/trace/method-tree?begin=201410241500&end=201410241800&pathid=%23',
-       xhrFields: {
-          withCredentials: true
-       }
-    }).done(function(data) {
-        console.log(data);
-    }).fail(function(data) {
-        console.log(data);
+    function getTreeData(id) {
+        if (!id) {
+            id = '#';
+        }
+        return $.ajax({
+           url: host + '/trace/method-tree?begin=201410241500&end=201410241800&pathid=' + id,
+           xhrFields: {
+              withCredentials: true
+           }
+        }).done(function(data) {
+            console.log(data);
+        });
+    }
+
+    function showCostPie(data) {
+        var pieSeries = [{
+            name:'运行时间占比',
+            type:'pie',
+            // radius : '60%',
+            // center: ['45%', '60%'],
+            data:[]
+        }];
+        $.each(data, function(i, v) {
+            pieSeries[0].data[i] = {
+                name: v.text,
+                value: v.cost
+            };
+        });
+        chartPie.setSeries(pieSeries);
+    }
+
+    function getLineData() {
+        return $.ajax({
+           url: host + '/trace/method-stack?begin=201410241500&end=201410241800&pathid=190c22493e2e8312d76495688c620022&method=uluru-api.app-storage-meta/permissions-%3Eacl',
+           xhrFields: {
+              withCredentials: true
+           }
+        }).done(function(data) {
+            // console.log(data);
+        });
+    }
+
+    function showCostLine(data) {
+        var lineSeries = [];
+        $.each(data.series, function(i, v) {
+            lineSeries[i] = {
+                name: v.name,
+                data: v.data,
+                type: 'line',
+                smooth: true,
+                itemStyle: {
+                    normal: {
+                        areaStyle: {
+                            type: 'default'
+                        }
+                    }
+                }
+            };
+        });
+        var names = [];
+        $.each(lineSeries, function(i, v) {
+            names[i] = lineSeries[i].name;
+        });
+        var opts = {
+            legend: {
+                data: names
+            },
+            xAxis: [
+                {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: data.times
+                }
+            ]            
+        };
+        chartLine.setOption(opts);
+        chartLine.setSeries(lineSeries);
+    }
+
+    getTreeData().done(function(data) {
+        showCostPie(data);
     });
 
-    var pieSeries = [{
-        name:'访问来源',
-        type:'pie',
-        radius : '40%',
-        center: ['45%', '30%'],
-        data:[
-            {value:335, name:'直1231问'},
-            {value:310, name:'邮件营销'},
-            {value:234, name:'联盟广告'},
-            {value:135, name:'视频广告'},
-            {value:1548, name:'搜索引擎'}
-        ]
-    }];
-    chartPie.setSeries(pieSeries);
-
-
-    var lineSeries = [
-        {
-            name:'成交',
-            type:'line',
-            smooth:true,
-            itemStyle: {normal: {areaStyle: {type: 'default'}}},
-            data:[10, 12, 21, 54, 260, 830, 710]
-        },
-        {
-            name:'预购',
-            type:'line',
-            smooth:true,
-            itemStyle: {normal: {areaStyle: {type: 'default'}}},
-            data:[30, 182, 434, 791, 390, 30, 10]
-        },
-        {
-            name:'意向',
-            type:'line',
-            smooth:true,
-            itemStyle: {normal: {areaStyle: {type: 'default'}}},
-            data:[1320, 1132, 601, 234, 120, 90, 20]
-        }
-    ];
-    chartLine.setSeries(lineSeries);
+    getLineData().done(function(data) {
+        // data = {"series":[{"name":"uluru-api.handlers.objects\/with-check-permission","data":[9813847,18199304,7312268,7521416,6507326,6317993,6369038,7565387,6553377,6911943,12418986]},{"name":"uluru-api.handlers.endpoint\/send-stats-event","data":[12887354,719261,668045,983221,712984,716103,732451,794298,764182,1037906,1079714]},{"name":"query-objects","data":[10610668,19078955,8152946,8887898,7385767,7183091,7259238,8612113,7508798,8118135,13674292]}],"times":["15:48","15:49","15:50","15:51","15:52","15:53","15:54","15:55","15:56","15:57","15:58"]};
+        // console.log(data);
+        showCostLine(data);
+    });
 
 });
