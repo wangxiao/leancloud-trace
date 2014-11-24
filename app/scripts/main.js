@@ -10,6 +10,10 @@ require([
 ],
 function (ec) {
     var host = 'http://trace.avoscloud.com';
+    var beginTime = '201410241500';
+    var endTime = '201410241800';
+    var treeData = [];
+
     var colorTheme = [
         "#2ec7c9",
         "#b6a2de",
@@ -33,54 +37,69 @@ function (ec) {
         "#c14089"
     ];
 
-    // 初始化饼状图
-    var pieOption = {
-        // title : {
-        //     text: '某站点用户访问来源',
-        //     subtext: '纯属虚构',
-        //     x:'center'
-        // },
-        color: colorTheme,
-        tooltip : {
-            trigger: 'item',
-            formatter: "{a} <br/>{b} : {c} ({d}%)"
-        },
-        calculable : true,
-    };
-    var chartPie = ec.init(document.getElementById('root-tree'));
-    chartPie.setOption(pieOption);
+    var chartPie;
+    var chartLine;
 
-    // 初始化线形图
-    var lineOption = {
-        // title : {
-        //     text: '某楼盘销售情况',
-        //     subtext: '纯属虚构'
-        // },
-        color: colorTheme,
-        tooltip : {
-            trigger: 'axis'
-        },
-        // calculable : true,
-        yAxis : [
-            {
-                type : 'value'
+    function initPie() {
+        // 初始化饼状图
+        var pieOption = {
+            // title : {
+            //     text: '某站点用户访问来源',
+            //     subtext: '纯属虚构',
+            //     x:'center'
+            // },
+            color: colorTheme,
+            tooltip : {
+                trigger: 'item',
+                // formatter: "{a} <br/>{b} : {c} ({d}%)"
+                formatter: "{a}：{d}%<br/>{b}<br/>点击显示波动数据"
+            },
+            calculable : true,
+        };
+        chartPie = ec.init(document.getElementById('root-tree-pie'));
+        chartPie.setOption(pieOption);
+        chartPie.on('click', function(data) {
+            getLineData(treeData[data.dataIndex].pathid, treeData[data.dataIndex].method).done(function(data) {
+                showCostLine(data);
+            });
+        });
+    }
+    
+    function initLine() {
+        // 初始化线形图
+        var lineOption = {
+            color: colorTheme,
+            tooltip : {
+                trigger: 'axis'
+            },
+            yAxis : [
+                {
+                    type : 'value'
+                }
+            ],
+            dataZoom: {
+                show: true
             }
-        ]
-    };
-    var chartLine = ec.init(document.getElementById('show-detail'));
-    chartLine.setOption(lineOption);
+        };
+        chartLine = ec.init(document.getElementById('show-detail'));
+        chartLine.setOption(lineOption);        
+    }
 
     function getTreeData(id) {
         if (!id) {
             id = '#';
         }
         return $.ajax({
-           url: host + '/trace/method-tree?begin=201410241500&end=201410241800&pathid=' + id,
+           url: host + '/trace/method-tree?begin=' + beginTime + '&end=' + endTime + '&pathid=' + id,
            xhrFields: {
               withCredentials: true
            }
         }).done(function(data) {
-            console.log(data);
+            if (data.length) {
+                treeData = data;
+            }
+            // console.log('method-tree data:');
+            // console.log(data);
         });
     }
 
@@ -101,13 +120,14 @@ function (ec) {
         chartPie.setSeries(pieSeries);
     }
 
-    function getLineData() {
+    function getLineData(id, method) {
         return $.ajax({
-           url: host + '/trace/method-stack?begin=201410241500&end=201410241800&pathid=190c22493e2e8312d76495688c620022&method=uluru-api.app-storage-meta/permissions-%3Eacl',
-           xhrFields: {
-              withCredentials: true
-           }
+            url: host + '/trace/method-stack?begin=' + beginTime + '&end=' + endTime + '&pathid=' + id + '&method=' + method,
+            xhrFields: {
+                withCredentials: true
+            }
         }).done(function(data) {
+            // console.log('method-stack data:');
             // console.log(data);
         });
     }
@@ -120,7 +140,9 @@ function (ec) {
                 data: v.data,
                 type: 'line',
                 smooth: true,
+                show: true,
                 itemStyle: {
+                    show: true,
                     normal: {
                         areaStyle: {
                             type: 'default'
@@ -133,30 +155,47 @@ function (ec) {
         $.each(lineSeries, function(i, v) {
             names[i] = lineSeries[i].name;
         });
-        var opts = {
-            legend: {
-                data: names
-            },
-            xAxis: [
-                {
-                    type: 'category',
-                    boundaryGap: false,
-                    data: data.times
-                }
-            ]            
+        initLine();
+        var opts = chartLine.getOption();
+        opts.legend = {
+            data: names
         };
-        chartLine.setOption(opts);
+        opts.xAxis = [{
+            type: 'category',
+            boundaryGap: false,
+            data: data.times
+        }];
+
+        chartLine.setOption(opts, true);
         chartLine.setSeries(lineSeries);
     }
 
-    getTreeData().done(function(data) {
-        showCostPie(data);
-    });
+    function updatePie(id) {
+        getTreeData(id).done(function(data) {
+            if (data.length) {
+                showCostPie(data);
+                showLineFirst(data);
+            }
+        });   
+    }
 
-    getLineData().done(function(data) {
-        // data = {"series":[{"name":"uluru-api.handlers.objects\/with-check-permission","data":[9813847,18199304,7312268,7521416,6507326,6317993,6369038,7565387,6553377,6911943,12418986]},{"name":"uluru-api.handlers.endpoint\/send-stats-event","data":[12887354,719261,668045,983221,712984,716103,732451,794298,764182,1037906,1079714]},{"name":"query-objects","data":[10610668,19078955,8152946,8887898,7385767,7183091,7259238,8612113,7508798,8118135,13674292]}],"times":["15:48","15:49","15:50","15:51","15:52","15:53","15:54","15:55","15:56","15:57","15:58"]};
-        // console.log(data);
-        showCostLine(data);
-    });
+    function showLineFirst(data0, i) {
+        if (arguments.length < 2) {
+            i = 0;
+        } else if (i >= data0.length) {
+            return;
+        }
+        getLineData(data0[i].pathid, data0[i].method).done(function(data) {
+            if (data.times.length) {
+                showCostLine(data);
+            } else {
+                i ++;
+                showLineFirst(data0, i);
+            }
+        });
+    }
 
+    // 运行逻辑
+    initPie();
+    updatePie();
 });

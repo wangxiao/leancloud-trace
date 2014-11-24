@@ -1,3 +1,20 @@
+/* 基础色 */
+$standard-deep-black: #000000;
+$standard-black: #282828;
+$standard-light-black: #313131;
+$standard-white: #ffffff;
+$standard-blue: #2890e0;
+$standard-light-blue: #0086FF;
+$standard-deep-blue: #1C5095;
+$standard-orange: #FE7325;
+$standard-gray: #ebebeb;
+$standard-deep-gray: #aaa;
+$standard-red: #ed7161;
+$standard-light-red: #FDE3E3;
+$standard-deep-orange: #faaf46;
+$standard-blue-green: #74aac5;
+$standard-green: #5c9c02;
+
 * {
     margin: 0px;
     padding: 0px;
@@ -5,6 +22,29 @@
 
 body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.btn {
+    border-radius: 2px;
+    display: inline-block;
+    background-color: $standard-blue;
+    color: $standard-white;
+    padding: 4px 14px;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: center;
+    transition: opacity 0.4s;
+    &:hover {
+        opacity: 0.8;
+    }
+    &.disabled {
+        background-color: $standard-deep-gray;
+        cursor: default;
+        opacity: 0.8;
+    }
+    &:active {
+        opacity: 1;
+    }
 }
 
 .wrapper {
@@ -16,10 +56,12 @@ body {
 
 .root-tree {
     display: inline-block;
-    width: 600px;
-    height: 300px;
     vertical-align: top;
     margin-top: 100px;
+    .pie {
+        width: 600px;
+        height: 300px;        
+    }
 }
 
 .show-detail {
