@@ -57,9 +57,11 @@ function (ec) {
         chartPie = ec.init(document.getElementById('root-tree-pie'));
         chartPie.setOption(pieOption);
         chartPie.on('click', function(data) {
-            getLineData(treeData[data.dataIndex].pathid, treeData[data.dataIndex].method).done(function(data) {
-                showCostLine(data);
-            });
+            if (treeData[data.dataIndex]) {
+                getLineData(treeData[data.dataIndex].pathid, treeData[data.dataIndex].method).done(function(data) {
+                    showCostLine(data);
+                });
+            }
         });
     }
     
