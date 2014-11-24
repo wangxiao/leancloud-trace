@@ -10,10 +10,14 @@ require([
 ],
 function (ec) {
     var host = 'http://trace.avoscloud.com';
-    var beginTime = '201410241500';
-    var endTime = '201410241800';
+    var beginTime = window.localStorage.getItem('beginTime') || '201410241500';
+    var endTime = window.localStorage.getItem('endTime') || '201410241800';
     var treeData = [];
-
+    $.ajaxSetup({
+        xhrFields: {
+            withCredentials: true
+        }
+    });
     var colorTheme = [
         "#2ec7c9",
         "#b6a2de",
@@ -43,15 +47,9 @@ function (ec) {
     function initPie() {
         // 初始化饼状图
         var pieOption = {
-            // title : {
-            //     text: '某站点用户访问来源',
-            //     subtext: '纯属虚构',
-            //     x:'center'
-            // },
             color: colorTheme,
             tooltip : {
                 trigger: 'item',
-                // formatter: "{a} <br/>{b} : {c} ({d}%)"
                 formatter: "{a}：{d}%<br/>{b}<br/>点击显示波动数据"
             },
             calculable : true,
@@ -90,10 +88,7 @@ function (ec) {
             id = '#';
         }
         return $.ajax({
-           url: host + '/trace/method-tree?begin=' + beginTime + '&end=' + endTime + '&pathid=' + id,
-           xhrFields: {
-              withCredentials: true
-           }
+            url: host + '/trace/method-tree?begin=' + beginTime + '&end=' + endTime + '&pathid=' + id
         }).done(function(data) {
             if (data.length) {
                 treeData = data;
@@ -107,8 +102,6 @@ function (ec) {
         var pieSeries = [{
             name:'运行时间占比',
             type:'pie',
-            // radius : '60%',
-            // center: ['45%', '60%'],
             data:[]
         }];
         $.each(data, function(i, v) {
@@ -122,10 +115,7 @@ function (ec) {
 
     function getLineData(id, method) {
         return $.ajax({
-            url: host + '/trace/method-stack?begin=' + beginTime + '&end=' + endTime + '&pathid=' + id + '&method=' + method,
-            xhrFields: {
-                withCredentials: true
-            }
+            url: host + '/trace/method-stack?begin=' + beginTime + '&end=' + endTime + '&pathid=' + id + '&method=' + method
         }).done(function(data) {
             // console.log('method-stack data:');
             // console.log(data);
@@ -195,7 +185,47 @@ function (ec) {
         });
     }
 
+    function initTree() {
+        $('#root-tree').jstree({
+            'core': {
+                'data': {
+                    'url': host + '/trace/method-tree?begin=' + beginTime + '&end=' + endTime + '&pathid=#',
+                    'data': function (node) {
+                        return {
+                            'pathid': node.id, 
+                            'method': node.method 
+                        };
+                    }
+                }
+            }
+        }).on('changed.jstree', function(e, data) {
+            updatePie(data.node.id);
+        });
+    }
+
+    function updateBeginAndEnd(begin, end) {
+        if (begin) {
+            beginTime = begin;
+        }
+        if (end) {
+            endTime = end;
+        }
+        $('#beginTime').val(beginTime);
+        $('#endTime').val(endTime);
+        window.localStorage.setItem('beginTime', beginTime);
+        window.localStorage.setItem('endTime', endTime);
+    }
+
+    $('#updateDataBtn').on('click', function(e) {
+        var begin = $('#beginTime').val();
+        var end = $('#endTime').val();
+        updateBeginAndEnd(begin, end);
+        updatePie();
+    });
+
     // 运行逻辑
+    initTree();
     initPie();
     updatePie();
+    updateBeginAndEnd();
 });

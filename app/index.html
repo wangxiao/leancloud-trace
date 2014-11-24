@@ -8,6 +8,7 @@
         <meta name="viewport" content="user-scalable=no">
         <meta name="viewport" content="initial-scale=1,maximum-scale=1">
         <!-- <link rel="shortcut icon" href="/favicon.ico"> -->
+        <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/jstree/3.0.4/themes/default/style.min.css"/>
         <!-- build:css(.tmp) styles/main.css -->
         <link rel="stylesheet" href="styles/main.css">
         <!-- endbuild -->
@@ -17,20 +18,19 @@
             <h1>LeanCloud Trace</h1>
             <div class="inputs">
                 <p>时间区间</p>
-                <p>begin:</p><input type="text">
-                <p>end:</p><input type="text">
-                <span class="btn">更新数据</span>
+                <p>begin:</p><input id="beginTime" type="text">
+                <p>end:</p><input id="endTime" type="text">
+                <span id="updateDataBtn" class="btn">更新数据</span>
             </div>
-            <div class="root-tree">
-                <div id="root-tree-pie" class="pie"></div>
-            </div>
-            <div id="show-detail" class="show-detail">
-            </div>
+            <div id="root-tree" class="root-tree"></div>
+            <div id="root-tree-pie" class="root-tree-pie"></div>
+            <div id="show-detail" class="show-detail"></div>
         </div>
 
+        <script src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/jstree/3.0.4/jstree.min.js"></script>
         <script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
         <!-- build:js({app,.tmp}) scripts/main.js -->
-        <script src="../bower_components/jquery/dist/jquery.min.js"></script>
         <script src="scripts/main.js"></script>
         <!-- endbuild -->
 </body>

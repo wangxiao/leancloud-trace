@@ -55,20 +55,27 @@ body {
 }
 
 .root-tree {
+    padding-top: 90px;
+    text-align: left;
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 30px;
+    width: 580px;
+}
+
+.root-tree-pie {
     display: inline-block;
     vertical-align: top;
     margin-top: 100px;
-    .pie {
-        width: 600px;
-        height: 300px;        
-    }
+    width: 600px;
+    height: 300px;
 }
 
 .show-detail {
-    display: inline-block;
-    margin-top: 50px;
-    width: 800px;
+    display: block;
+    width: 80%;
     height: 500px;
+    margin: 50px auto 50px auto;
 }
 
 .inputs {
