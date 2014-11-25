@@ -112,6 +112,7 @@ function (ec) {
                 value: v.cost
             };
         });
+        chartPie.clear();
         chartPie.setSeries(pieSeries);
     }
 
