@@ -164,10 +164,9 @@ function (ec) {
     }
 
     function updatePie(id) {
-        getTreeData(id).done(function(data) {
+        return getTreeData(id).done(function(data) {
             if (data.length) {
                 showCostPie(data);
-                showLineFirst(data);
             }
         });   
     }
@@ -203,6 +202,9 @@ function (ec) {
             }
         }).on('changed.jstree', function(e, data) {
             updatePie(data.node.id);
+            getLineData(data.node.original.pathid, data.node.original.method).done(function(data) {
+                showCostLine(data);
+            });
         });
     }
 
@@ -223,12 +225,20 @@ function (ec) {
         var begin = $('#beginTime').val();
         var end = $('#endTime').val();
         updateBeginAndEnd(begin, end);
-        updatePie();
+        updatePie().done(function(data) {
+            if (data.length) {
+                showLineFirst(data);
+            }
+        });
     });
 
     // 运行逻辑
     initTree();
     initPie();
-    updatePie();
+    updatePie().done(function(data) {
+        if (data.length) {
+            showLineFirst(data);
+        }
+    });
     updateBeginAndEnd();
 });
