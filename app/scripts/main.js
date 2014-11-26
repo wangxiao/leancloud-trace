@@ -137,6 +137,7 @@ function (ec) {
                 type: 'line',
                 smooth: true,
                 show: true,
+                stack:'all',
                 itemStyle: {
                     show: true,
                     normal: {
