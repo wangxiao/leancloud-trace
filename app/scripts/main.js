@@ -85,12 +85,15 @@ function (ec) {
         chartLine.setOption(lineOption);        
     }
 
-    function getTreeData(id) {
+    function getTreeData(id, method) {
         if (!id) {
             id = '#';
         }
+        if (!method) {
+            method = '#';
+        }
         return $.ajax({
-            url: host + '/trace/method-tree?begin=' + beginTime + '&end=' + endTime + '&pathid=' + id
+            url: host + '/trace/method-tree?begin=' + beginTime + '&end=' + endTime + '&pathid=' + id + '&method=' + method
         }).done(function(data) {
             if (data.length) {
                 treeData = data;
@@ -163,8 +166,8 @@ function (ec) {
         chartLine.setSeries(lineSeries);
     }
 
-    function updatePie(id) {
-        return getTreeData(id).done(function(data) {
+    function updatePie(id, method) {
+        return getTreeData(id, method).done(function(data) {
             if (data.length) {
                 showCostPie(data);
             }
@@ -191,18 +194,24 @@ function (ec) {
         $('#root-tree').jstree({
             'core': {
                 'data': {
-                    'url': host + '/trace/method-tree?begin=' + beginTime + '&end=' + endTime + '&pathid=#',
+                    'url': host + '/trace/method-tree?begin=' + beginTime + '&end=' + endTime,
                     'data': function (node) {
-                        return {
-                            'pathid': node.id, 
-                            'method': node.method 
-                        };
+                        if (node.original) {
+                            var id = node.original.pathid;
+                            var method = node.original.method;
+                            return {
+                                'pathid': id,
+                                'method': method
+                            };
+                        }
                     }
                 }
             }
         }).on('changed.jstree', function(e, data) {
-            updatePie(data.node.id);
-            getLineData(data.node.original.pathid, data.node.original.method).done(function(data) {
+            var id = data.node.original.pathid;
+            var method = data.node.original.method;
+            updatePie(id, method);
+            getLineData(id, method).done(function(data) {
                 showCostLine(data);
             });
         });
